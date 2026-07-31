@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELO - Premium Footwear</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --leather: #2B1D14;
+            --leather-2: #3D2A1C;
+            --cream: #F6F0E6;
+            --cream-2: #EDE3D0;
+            --ink: #241A12;
+            --brass: #B08D57;
+            --brass-light: #D3B27C;
+            --burgundy: #7A2E2E;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--cream);
+            overflow-x: hidden;
+            color: var(--ink);
+        }
+
+        .grain::before{
+            content:'';
+            position:absolute; inset:0;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+            pointer-events:none;
+        }
+
+        .stitch-line{ border: none; border-top: 2px dashed rgba(176,141,87,0.5); position: relative; }
+        .stitch-line::after{ content:''; position:absolute; top:5px; left:0; right:0; border-top: 2px dashed rgba(176,141,87,0.5); }
+
+        .navbar {
+            background: rgba(246, 240, 230, 0.94) !important;
+            backdrop-filter: blur(20px);
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(43,29,20,0.08);
+            transition: all 0.4s ease;
+        }
+        .navbar.scrolled { padding: 12px 0; box-shadow: 0 4px 30px rgba(43,29,20,0.08); }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem; font-weight: 900; letter-spacing: -1px;
+            color: var(--leather) !important;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .navbar-brand i { color: var(--brass); font-size: 1.6rem; }
+
+        .nav-link {
+            font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--ink) !important; padding: 8px 20px !important; position: relative; transition: all 0.3s ease;
+        }
+        .nav-link::after {
+            content: ''; position: absolute; bottom: 0; left: 50%;
+            width: 0; height: 2px; background: var(--brass);
+            transition: all 0.3s ease; transform: translateX(-50%);
+        }
+        .nav-link:hover::after { width: 60%; }
+
+        .cart-link {
+            background: var(--leather); color: var(--cream) !important;
+            border-radius: 50px; padding: 8px 24px !important; transition: all 0.3s ease;
+        }
+        .cart-link:hover { background: var(--leather-2); transform: scale(1.05); }
+        .cart-link::after { display: none !important; }
+        .cart-badge {
+            background: var(--burgundy); color: white; font-size: 0.7rem; font-weight: 700;
+            padding: 2px 8px; border-radius: 50px; margin-left: 5px;
+        }
+
+        .hero {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at top right, var(--leather-2) 0%, var(--leather) 55%, #1A100A 100%);
+            position: relative; overflow: hidden; display: flex; align-items: center;
+        }
+        .hero::after {
+            content: 'VELO'; position: absolute; right: -5%; bottom: -12%;
+            font-family: 'Playfair Display', serif; font-size: 28rem; font-weight: 900;
+            color: rgba(255,255,255,0.025); letter-spacing: 20px; pointer-events: none; white-space: nowrap;
+        }
+        .hero-content { position: relative; z-index: 2; padding: 80px 0; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(211,178,124,0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(211,178,124,0.3); padding: 8px 24px; border-radius: 50px;
+            font-size: 0.78rem; color: var(--brass-light); letter-spacing: 3px; text-transform: uppercase;
+            margin-bottom: 30px; animation: fadeInUp 0.8s ease;
+        }
+        .hero-title {
+            font-family: 'Playfair Display', serif; font-size: 5.2rem; font-weight: 900;
+            line-height: 1.05; color: var(--cream); margin-bottom: 26px; animation: fadeInUp 1s ease;
+        }
+        .hero-title span { color: var(--brass-light); font-style: italic; }
+        .hero-subtitle {
+            font-size: 1.15rem; color: rgba(246,240,230,0.62); max-width: 500px;
+            line-height: 1.8; margin-bottom: 40px; font-weight: 300; animation: fadeInUp 1.2s ease;
+        }
+        .hero-btn {
+            background: var(--brass); color: var(--leather);
+            padding: 18px 50px; border-radius: 50px; font-weight: 700; font-size: 0.95rem;
+            text-transform: uppercase; letter-spacing: 2px; transition: all 0.4s ease;
+            border: none; display: inline-flex; align-items: center; gap: 15px;
+            animation: fadeInUp 1.4s ease; text-decoration: none;
+        }
+        .hero-btn:hover {
+            transform: translateY(-3px) scale(1.02); box-shadow: 0 20px 60px rgba(211,178,124,0.3);
+            color: var(--leather); background: var(--brass-light);
+        }
+        .hero-stats { display: flex; gap: 60px; margin-top: 60px; animation: fadeInUp 1.6s ease; }
+        .hero-stat { border-left: 2px dashed rgba(211,178,124,0.35); padding-left: 18px; }
+        .hero-stat h3 { font-family:'Playfair Display', serif; font-size: 2.4rem; font-weight: 700; color: var(--cream); margin-bottom: 4px; }
+        .hero-stat p { color: rgba(246,240,230,0.4); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        .hero-shoe-display { position: relative; animation: floatShoe 6s ease-in-out infinite; }
+        @keyframes floatShoe { 0%, 100% { transform: translateY(0px) rotate(-5deg); } 50% { transform: translateY(-20px) rotate(5deg); } }
+        .hero-shoe-display i { font-size: 18rem; color: rgba(211,178,124,0.07); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .category-section { padding: 90px 0; background: var(--cream); }
+        .category-card {
+            position: relative; overflow: hidden; border-radius: 4px; height: 300px;
+            cursor: pointer; transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid rgba(43,29,20,0.08);
+        }
+        .category-card:hover { transform: translateY(-6px); box-shadow: 0 24px 50px rgba(43,29,20,0.15); }
+        .category-card .overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(0deg, rgba(36,26,18,0.82) 0%, transparent 100%);
+            display: flex; align-items: flex-end; padding: 30px; transition: all 0.3s ease;
+        }
+        .category-card .overlay h3 { color: var(--cream); font-family:'Playfair Display', serif; font-weight: 700; font-size: 1.5rem; margin-bottom: 5px; }
+        .category-card .overlay p { color: var(--brass-light); margin: 0; font-size: 0.85rem; letter-spacing: 0.5px; }
+        .category-card.bg-1 { background: linear-gradient(135deg, #3D2A1C, #2B1D14); }
+        .category-card.bg-2 { background: linear-gradient(135deg, #4A3524, #2B1D14); }
+        .category-card.bg-3 { background: linear-gradient(135deg, #24160E, #150C07); }
+
+        .products-section { padding: 90px 0; background: var(--cream-2); }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-header .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 4px; color: var(--brass); font-weight: 700; }
+        .section-header h2 { font-family: 'Playfair Display', serif; font-size: 3.2rem; font-weight: 900; color: var(--leather); margin-top: 8px; }
+
+        .product-card {
+            background: var(--cream); border: 1px solid rgba(43,29,20,0.08); border-radius: 4px;
+            overflow: hidden; transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 2px 16px rgba(43,29,20,0.04); position: relative; height: 100%;
+        }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 30px 55px rgba(43,29,20,0.13); }
+
+        .product-image-wrapper { position: relative; overflow: hidden; background: var(--cream-2); padding-top: 100%; }
+        .product-image-wrapper img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .product-card:hover .product-image-wrapper img { transform: scale(1.06); }
+
+        .product-actions {
+            position: absolute; top: 15px; right: 15px; display: flex; flex-direction: column; gap: 8px;
+            opacity: 0; transform: translateX(20px); transition: all 0.4s ease;
+        }
+        .product-card:hover .product-actions { opacity: 1; transform: translateX(0); }
+        .product-action-btn {
+            width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--cream);
+            box-shadow: 0 4px 15px rgba(43,29,20,0.15); color: var(--leather); transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .product-action-btn:hover { background: var(--leather); color: var(--cream); }
+
+        .product-badge {
+            position: absolute; top: 15px; left: 15px; background: var(--leather); color: var(--cream);
+            padding: 4px 16px; border-radius: 50px; font-size: 0.68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .product-badge.sale { background: var(--burgundy); }
+
+        .product-body { padding: 24px; }
+        .product-brand { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--brass); font-weight: 700; }
+        .product-name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.15rem; color: var(--leather); margin: 8px 0; }
+        .product-price { font-size: 1.25rem; font-weight: 700; color: var(--leather); }
+        .product-price .old { font-size: 0.85rem; color: #999; text-decoration: line-through; font-weight: 400; margin-left: 10px; }
+
+        .product-sizes { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+        .product-size {
+            padding: 4px 12px; border: 1px dashed rgba(176,141,87,0.5); border-radius: 4px;
+            font-size: 0.72rem; font-weight: 700; color: var(--leather); transition: all 0.2s ease;
+        }
+        .product-size:hover { border-style: solid; border-color: var(--brass); cursor: pointer; }
+
+        .btn-add {
+            width: 100%; margin-top: 15px; padding: 12px; border: 2px solid var(--leather);
+            background: transparent; color: var(--leather); border-radius: 50px; font-weight: 700;
+            font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.4s ease;
+            cursor: pointer; text-decoration: none; display: block; text-align: center;
+        }
+        .btn-add:hover { background: var(--leather); color: var(--cream); }
+        .btn-add:active { transform: scale(0.97); }
+
+        .newsletter-section { padding: 100px 0; background: var(--leather); position: relative; overflow: hidden; }
+        .newsletter-content { position: relative; z-index: 2; text-align: center; }
+        .newsletter-content h2 { font-family: 'Playfair Display', serif; font-size: 2.9rem; font-weight: 900; color: var(--cream); margin-bottom: 15px; }
+        .newsletter-content p { color: rgba(246,240,230,0.55); font-size: 1.1rem; max-width: 500px; margin: 0 auto 30px; }
+        .newsletter-form { display: flex; max-width: 500px; margin: 0 auto; gap: 10px; }
+        .newsletter-form input {
+            flex: 1; padding: 16px 24px; border: 1px solid rgba(211,178,124,0.3); border-radius: 50px;
+            background: rgba(255,255,255,0.05); color: var(--cream); font-size: 1rem; outline: none; transition: all 0.3s ease;
+        }
+        .newsletter-form input::placeholder { color: rgba(246,240,230,0.35); }
+        .newsletter-form input:focus { background: rgba(255,255,255,0.09); border-color: var(--brass); }
+        .newsletter-form button {
+            padding: 16px 36px; border: none; border-radius: 50px; background: var(--brass);
+            color: var(--leather); font-weight: 700; transition: all 0.3s ease; cursor: pointer; white-space: nowrap;
+        }
+        .newsletter-form button:hover { background: var(--brass-light); transform: scale(1.03); }
+
+        .footer { background: #1A100A; padding: 80px 0 30px; border-top: 1px solid rgba(211,178,124,0.1); }
+        .footer-brand { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: var(--cream); margin-bottom: 20px; }
+        .footer p { color: rgba(246,240,230,0.4); line-height: 1.8; max-width: 300px; }
+        .footer h5 { color: var(--brass-light); font-weight: 700; margin-bottom: 20px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; }
+        .footer ul { list-style: none; padding: 0; }
+        .footer ul li { margin-bottom: 12px; }
+        .footer ul li a { color: rgba(246,240,230,0.4); text-decoration: none; transition: all 0.3s ease; font-size: 0.9rem; }
+        .footer ul li a:hover { color: var(--brass-light); }
+        .footer-social { display: flex; gap: 15px; margin-top: 20px; }
+        .footer-social a {
+            width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(211,178,124,0.25);
+            display: flex; align-items: center; justify-content: center; color: rgba(246,240,230,0.4);
+            transition: all 0.3s ease; text-decoration: none;
+        }
+        .footer-social a:hover { border-color: var(--brass); color: var(--brass-light); }
+        .footer-bottom {
+            border-top: 1px dashed rgba(211,178,124,0.15); padding-top: 30px; margin-top: 50px;
+            text-align: center; color: rgba(246,240,230,0.25); font-size: 0.85rem;
+        }
+
+        @media (max-width: 992px) {
+            .hero-title { font-size: 3.4rem; }
+            .hero-stats { gap: 30px; }
+            .hero-shoe-display i { font-size: 11rem; }
+        }
+        @media (max-width: 768px) {
+            .hero { min-height: auto; padding: 60px 0; }
+            .hero-title { font-size: 2.7rem; }
+            .hero-shoe-display { display: none; }
+            .section-header h2 { font-size: 2.4rem; }
+            .newsletter-form { flex-direction: column; }
+            .category-card { height: 200px; }
+        }
+        @media (max-width: 576px) {
+            .hero-title { font-size: 2.1rem; }
+            .hero-btn { padding: 14px 30px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+
+
+<div class="cart-overlay" id="cartOverlay"></div>
+
+<div class="cart-drawer" id="cartDrawer">
+    <div class="cart-drawer-header">
+        <h4><i class="fas fa-shopping-bag"></i> Your Bag</h4>
+        <button class="cart-drawer-close" id="cartDrawerClose"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cart-drawer-body" id="cartDrawerBody">
+        <!-- populated by JS -->
+    </div>
+    <div class="cart-drawer-footer" id="cartDrawerFooter">
+        <!-- populated by JS -->
+    </div>
+</div>
+
+<style>
+    .cart-overlay {
+        position: fixed; inset: 0; background: rgba(26,16,10,0.45);
+        opacity: 0; pointer-events: none; transition: opacity 0.35s ease; z-index: 1040;
+    }
+    .cart-overlay.open { opacity: 1; pointer-events: all; }
+
+    .cart-drawer {
+        position: fixed; top: 0; right: 0; height: 100vh; width: 420px; max-width: 92vw;
+        background: var(--cream, #F6F0E6); z-index: 1050;
+        transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        display: flex; flex-direction: column;
+        box-shadow: -20px 0 60px rgba(26,16,10,0.2);
+    }
+    .cart-drawer.open { transform: translateX(0); }
+
+    .cart-drawer-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 22px 24px; border-bottom: 1px solid rgba(43,29,20,0.1);
+    }
+    .cart-drawer-header h4 {
+        font-family: 'Playfair Display', serif; font-size: 1.25rem; color: var(--leather, #2B1D14);
+        display: flex; align-items: center; gap: 10px; margin: 0;
+    }
+    .cart-drawer-close {
+        width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent;
+        color: var(--leather, #2B1D14); font-size: 1rem; cursor: pointer; transition: background 0.2s ease;
+    }
+    .cart-drawer-close:hover { background: rgba(43,29,20,0.06); }
+
+    .cart-drawer-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+    .drawer-item { display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px dashed rgba(176,141,87,0.35); }
+    .drawer-item-img {
+        width: 64px; height: 64px; border-radius: 4px; background: var(--cream-2, #EDE3D0);
+        display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;
+    }
+    .drawer-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .drawer-item-img i { color: rgba(43,29,20,0.15); font-size: 1.4rem; }
+    .drawer-item-info { flex: 1; min-width: 0; }
+    .drawer-item-info h6 { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--leather, #2B1D14); margin: 0 0 6px; }
+    .drawer-item-price { font-size: 0.85rem; color: var(--brass, #B08D57); font-weight: 700; }
+
+    .drawer-qty { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    .drawer-qty button {
+        width: 26px; height: 26px; border-radius: 50%; border: 1px dashed rgba(176,141,87,0.5);
+        background: transparent; color: var(--leather, #2B1D14); font-weight: 700; cursor: pointer; font-size: 0.85rem;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .drawer-qty button:hover { background: rgba(176,141,87,0.1); }
+    .drawer-qty span { font-weight: 700; font-size: 0.85rem; min-width: 16px; text-align: center; }
+
+    .drawer-remove {
+        margin-left: auto; align-self: flex-start; background: none; border: none;
+        color: rgba(43,29,20,0.3); cursor: pointer; padding: 4px;
+    }
+    .drawer-remove:hover { color: #7A2E2E; }
+
+    .cart-drawer-footer { border-top: 1px solid rgba(43,29,20,0.1); padding: 20px 24px 24px; }
+    .drawer-summary-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--ink, #241A12); padding: 4px 0; }
+    .drawer-summary-row.total { font-weight: 700; font-size: 1.1rem; margin-top: 6px; }
+    .drawer-checkout-btn {
+        display: block; width: 100%; text-align: center; margin-top: 14px; padding: 15px;
+        background: var(--leather, #2B1D14); color: var(--cream, #F6F0E6); border-radius: 50px;
+        font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;
+        text-decoration: none; transition: background 0.3s ease;
+    }
+    .drawer-checkout-btn:hover { background: var(--leather-2, #3D2A1C); color: var(--cream, #F6F0E6); }
+
+    .drawer-empty { text-align: center; padding: 60px 20px; color: rgba(43,29,20,0.4); }
+    .drawer-empty i { font-size: 3rem; margin-bottom: 16px; display: block; }
+
+    body.cart-open { overflow: hidden; }
+</style>
+
+<script>
+(function () {
+    function getCookie(name) {
+        const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return match ? match.pop() : '';
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    const overlay = document.getElementById('cartOverlay');
+    const drawer = document.getElementById('cartDrawer');
+    const body = document.getElementById('cartDrawerBody');
+    const footer = document.getElementById('cartDrawerFooter');
+
+    function openDrawer() {
+        overlay.classList.add('open');
+        drawer.classList.add('open');
+        document.body.classList.add('cart-open');
+    }
+    function closeDrawer() {
+        overlay.classList.remove('open');
+        drawer.classList.remove('open');
+        document.body.classList.remove('cart-open');
+    }
+
+    function renderDrawer(data) {
+        if (!data.items.length) {
+            body.innerHTML = `<div class="drawer-empty"><i class="fas fa-shopping-bag"></i>Your bag is empty</div>`;
+            footer.innerHTML = '';
+        } else {
+            body.innerHTML = data.items.map(item => `
+                <div class="drawer-item">
+                    <div class="drawer-item-img">
+                        ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}">` : `<i class="fas fa-shoe-prints"></i>`}
+                    </div>
+                    <div class="drawer-item-info">
+                        <h6>${item.name}</h6>
+                        <div class="drawer-item-price">$${item.subtotal.toFixed(2)}</div>
+                        <div class="drawer-qty">
+                            <button data-action="decrease" data-id="${item.id}">&minus;</button>
+                            <span>${item.quantity}</span>
+                            <button data-action="increase" data-id="${item.id}">+</button>
+                        </div>
+                    </div>
+                    <button class="drawer-remove" data-remove="${item.id}"><i class="fas fa-times"></i></button>
+                </div>
+            `).join('');
+
+            footer.innerHTML = `
+                <div class="drawer-summary-row"><span>Subtotal</span><span>$${data.subtotal.toFixed(2)}</span></div>
+                <div class="drawer-summary-row"><span>Shipping</span><span>${data.shipping === 0 ? 'Free' : '$' + data.shipping.toFixed(2)}</span></div>
+                <div class="drawer-summary-row total"><span>Total</span><span>$${data.total.toFixed(2)}</span></div>
+                <a href="/cart/" class="drawer-checkout-btn">View Bag & Checkout</a>
+            `;
+        }
+        updateBadge(data.count);
+    }
+
+    function updateBadge(count) {
+        const badge = document.querySelector('.cart-badge');
+        const cartLink = document.querySelector('.cart-link');
+        if (count > 0) {
+            if (badge) badge.textContent = count;
+            else if (cartLink) cartLink.insertAdjacentHTML('beforeend', `<span class="cart-badge">${count}</span>`);
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    function fetchCart() {
+        fetch('/cart/data/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.json())
+            .then(renderDrawer);
+    }
+
+    function postAction(url, extra) {
+        const options = {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: extra || '',
+        };
+        return fetch(url, options).then(r => r.json());
+    }
+
+    // --- Add to bag: intercept clicks on any .btn-add link ---
+    document.body.addEventListener('click', function (e) {
+        const addBtn = e.target.closest('.btn-add:not([disabled])');
+        if (addBtn && addBtn.tagName === 'A') {
+            e.preventDefault();
+            const url = addBtn.getAttribute('href');
+            postAction(url).then(data => {
+                if (data.success) {
+                    renderDrawer(data);
+                    openDrawer();
+                }
+            });
+            return;
+        }
+
+        // --- Drawer quantity +/- ---
+        const qtyBtn = e.target.closest('.drawer-qty button');
+        if (qtyBtn) {
+            const id = qtyBtn.dataset.id;
+            const action = qtyBtn.dataset.action;
+            postAction(`/cart/update/${id}/`, `action=${action}`).then(renderDrawer);
+            return;
+        }
+
+        // --- Drawer remove ---
+        const removeBtn = e.target.closest('[data-remove]');
+        if (removeBtn) {
+            const id = removeBtn.dataset.remove;
+            postAction(`/cart/remove/${id}/`).then(renderDrawer);
+            return;
+        }
+
+        // --- Open drawer from the navbar cart icon instead of navigating ---
+        const cartLink = e.target.closest('.cart-link');
+        if (cartLink) {
+            e.preventDefault();
+            fetchCart();
+            openDrawer();
+            return;
+        }
+    });
+
+    overlay.addEventListener('click', closeDrawer);
+    document.getElementById('cartDrawerClose').addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+})();
+</script>    
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top" id="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}"><i class="fas fa-shoe-prints"></i> VELO</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="#products">Collection</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#categories">Categories</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#newsletter">Insider</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link cart-link" href="{% url 'cart' %}">
+                            <i class="fas fa-shopping-bag"></i> Cart
+                            {% if request.session.cart %}<span class="cart-badge">{{ request.session.cart|length }}</span>{% endif %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero grain">
+        <div class="container">
+            <div class="hero-content">
+                <div class="row align-items-center">
+                    <div class="col-lg-7">
+                        <div class="hero-badge"><i class="fas fa-star" style="color: var(--brass-light);"></i> Fall/Winter 2024 Collection</div>
+                        <h1 class="hero-title">Define Your<br><span>Style Legacy</span></h1>
+                        <p class="hero-subtitle">Where craftsmanship meets contemporary design. Explore our curated collection of premium footwear for the modern connoisseur.</p>
+                        <a href="#products" class="hero-btn"><span>Explore Collection</span><i class="fas fa-arrow-right"></i></a>
+                        <div class="hero-stats">
+                            <div class="hero-stat"><h3>12K+</h3><p>Happy Customers</p></div>
+                            <div class="hero-stat"><h3>250+</h3><p>Premium Styles</p></div>
+                            <div class="hero-stat"><h3>4.9★</h3><p>Average Rating</p></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 text-center hero-shoe-display"><i class="fas fa-shoe-prints"></i></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="categories" class="category-section">
+        <div class="container">
+            <div class="section-header"><div class="label">Shop by Category</div><h2>Find Your Perfect Pair</h2></div>
+            <div class="row g-4">
+                <div class="col-md-4"><div class="category-card bg-1"><div class="overlay"><div><h3>Men's Collection</h3><p>12 styles available</p></div></div></div></div>
+                <div class="col-md-4"><div class="category-card bg-2"><div class="overlay"><div><h3>Women's Collection</h3><p>15 styles available</p></div></div></div></div>
+                <div class="col-md-4"><div class="category-card bg-3"><div class="overlay"><div><h3>Limited Edition</h3><p>8 exclusive styles</p></div></div></div></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="products" class="products-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="label">Our Collection</div>
+                <h2>Editor's Picks</h2>
+                <p class="text-muted" style="max-width: 500px; margin: 15px auto 0;">Curated selections from the finest craftsmanship</p>
+            </div>
+
+            {% if shoes %}
+            <div class="row g-4">
+                {% for shoe in shoes %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="product-card">
+                        <div class="product-image-wrapper">
+                            {% if shoe.image %}
+                            <img src="{{ shoe.image.url }}" alt="{{ shoe.name }}">
+                            {% else %}
+                            <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--cream-2);">
+                                <i class="fas fa-shoe-prints" style="font-size: 4rem; color: rgba(43,29,20,0.15);"></i>
+                            </div>
+                            {% endif %}
+                            {% if shoe.stock > 0 %}<span class="product-badge">In Stock</span>{% else %}<span class="product-badge sale">Sold Out</span>{% endif %}
+                            <div class="product-actions">
+                                <button class="product-action-btn" title="Quick View"><i class="fas fa-eye"></i></button>
+                                <button class="product-action-btn" title="Add to Wishlist"><i class="far fa-heart"></i></button>
+                            </div>
+                        </div>
+                        <div class="product-body">
+                            <div class="product-brand">Premium Collection</div>
+                            <h5 class="product-name">{{ shoe.name }}</h5>
+                            <div class="product-sizes" data-sizes="{{ shoe.sizes }}"></div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:15px;">
+                                <div class="product-price">${{ shoe.price|floatformat:2 }}</div>
+                            </div>
+                            {% if shoe.stock > 0 %}
+                            <a href="{% url 'add_to_cart' shoe.id %}" class="btn-add"><i class="fas fa-shopping-bag"></i> Add to Bag</a>
+                            {% else %}
+                            <button class="btn-add" style="opacity:0.5;cursor:not-allowed;" disabled><i class="fas fa-times"></i> Unavailable</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-shoe-prints" style="font-size: 4rem; color: rgba(43,29,20,0.15); margin-bottom: 20px;"></i>
+                <h3 style="color: var(--leather); font-family:'Playfair Display', serif;">Collection Coming Soon</h3>
+                <p class="text-muted">Our new collection is being curated just for you</p>
+                <small class="text-muted">Add products through <a href="/admin">admin panel</a></small>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section id="newsletter" class="newsletter-section grain">
+        <div class="container">
+            <div class="newsletter-content">
+                <h2>Become an Insider</h2>
+                <p>Join our community and get exclusive access to new collections, early drops, and special offers.</p>
+                <form class="newsletter-form" onsubmit="return false;">
+                    <input type="email" placeholder="Enter your email address" required>
+                    <button type="submit">Subscribe</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="footer-brand"><i class="fas fa-shoe-prints"></i> VELO</div>
+                    <p>Redefining modern footwear with exceptional craftsmanship and timeless design.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-pinterest-p"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 mb-4"><h5>Shop</h5><ul><li><a href="#">Men's</a></li><li><a href="#">Women's</a></li><li><a href="#">Limited</a></li><li><a href="#">Sale</a></li></ul></div>
+                <div class="col-lg-2 col-md-4 mb-4"><h5>Support</h5><ul><li><a href="#">Shipping</a></li><li><a href="#">Returns</a></li><li><a href="#">Size Guide</a></li><li><a href="#">Contact</a></li></ul></div>
+                <div class="col-lg-2 col-md-4 mb-4"><h5>Company</h5><ul><li><a href="#">About</a></li><li><a href="#">Careers</a></li><li><a href="#">Sustainability</a></li><li><a href="#">Press</a></li></ul></div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2024 VELO. All rights reserved. Crafted with precision.</p></div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Renders size chips from the raw "7,8,9,10" string -- fixes the broken
+        // {{ shoe.sizes.split }} template syntax, which Django templates don't support.
+        document.querySelectorAll('.product-sizes').forEach(el => {
+            const raw = el.dataset.sizes || '';
+            const sizes = raw.split(',').map(s => s.trim()).filter(Boolean);
+            const shown = sizes.slice(0, 5);
+            const extra = sizes.length - shown.length;
+            el.innerHTML = shown.map(s => `<span class="product-size">${s}</span>`).join('')
+                + (extra > 0 ? `<span class="product-size">+${extra}</span>` : '');
+        });
+
+        document.querySelectorAll('.btn-add').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (this.disabled) return;
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+                this.style.opacity = '0.7';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-check"></i> Added!';
+                    this.style.background = '#3D6B4A';
+                    this.style.borderColor = '#3D6B4A';
+                    this.style.color = 'white';
+                    setTimeout(() => {
+                        this.innerHTML = originalHTML;
+                        this.style.background = '';
+                        this.style.borderColor = '';
+                        this.style.color = '';
+                        this.style.opacity = '1';
+                    }, 1500);
+                }, 600);
+            });
+        });
+
+        document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = this.querySelector('input');
+            const btn = this.querySelector('button');
+            if (input.value) {
+                const originalText = btn.textContent;
+                btn.innerHTML = '<i class="fas fa-check"></i> Subscribed!';
+                btn.style.background = '#3D6B4A';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                    input.value = '';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
