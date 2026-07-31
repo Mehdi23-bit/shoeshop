@@ -534,9 +534,19 @@
         <div class="container">
             <div class="section-header"><div class="label">Shop by Category</div><h2>Find Your Perfect Pair</h2></div>
             <div class="row g-4">
-                <div class="col-md-4"><div class="category-card bg-1"><div class="overlay"><div><h3>Men's Collection</h3><p>12 styles available</p></div></div></div></div>
-                <div class="col-md-4"><div class="category-card bg-2"><div class="overlay"><div><h3>Women's Collection</h3><p>15 styles available</p></div></div></div></div>
-                <div class="col-md-4"><div class="category-card bg-3"><div class="overlay"><div><h3>Limited Edition</h3><p>8 exclusive styles</p></div></div></div></div>
+                {% for cat in categories_preview %}
+                <div class="col-md-4">
+                    <div class="category-card {% if not cat.image %}bg-{{ forloop.counter }}{% endif %}"
+                         {% if cat.image %}style="background-image:url('{{ cat.image }}'); background-size:cover; background-position:center;"{% endif %}>
+                        <div class="overlay">
+                            <div>
+                                <h3>{{ cat.title }}</h3>
+                                <p>{{ cat.count }} style{{ cat.count|pluralize }} available</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </section>

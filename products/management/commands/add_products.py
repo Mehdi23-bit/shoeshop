@@ -1,490 +1,175 @@
-"""
-Replaces the placeholder checkout() from before. Uses your actual Order
-model -- generate_order_number() and calculate_totals() already exist there,
-they just were never being called.
-"""
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.contrib import messages
-from decimal import Decimal
-from .models import Shoe, Order
-from django.http import JsonResponse
-from .models import Shoe
+import requests
+from django.core.management.base import BaseCommand
+from django.core.files.base import ContentFile
+from django.utils.text import slugify
+from products.models import Shoe, Category
+from urllib.parse import urlparse
+import os
 
+class Command(BaseCommand):
+    help = 'Add sample shoe products'
 
-@ensure_csrf_cookie
-def home(request):
-    shoes = Shoe.objects.filter(is_active=True)
-    return render(request, 'home.html', {'shoes': shoes})
-
-
-@ensure_csrf_cookie
-def checkout(request):
-    cart = request.session.get('cart', {})
-
-    if not cart:
-        messages.error(request, "Your bag is empty.")
-        return redirect('home')
-
-    if request.method == 'POST':
-        # Build the `items` JSONField payload your Order model expects
-        items_payload = {}
-        for shoe_id, data in cart.items():
-            quantity = data.get('quantity', 1)
-            try:
-                shoe = Shoe.objects.get(id=shoe_id)
-            except Shoe.DoesNotExist:
-                continue
-            if shoe.stock < quantity:
-                messages.error(request, f"Not enough stock for {shoe.name}.")
-                return redirect('cart')
-            items_payload[shoe_id] = {
-                'price': data.get('price', float(shoe.final_price)),
-                'quantity': quantity,
-                'size': data.get('size', ''),
+    def handle(self, *args, **options):
+        category, created = Category.objects.get_or_create(
+            name='Footwear',
+            defaults={
+                'slug': 'footwear',
+                'description': 'All footwear products'
             }
-
-        order = Order(
-            customer_name=request.POST.get('name'),
-            customer_email=request.POST.get('email'),
-            customer_phone=request.POST.get('phone'),
-            shipping_address=request.POST.get('address'),
-            shipping_city=request.POST.get('city'),
-            shipping_method=request.POST.get('shipping_method', 'standard'),
-            payment_method=request.POST.get('payment_method', 'cash'),
-            items=items_payload,
-            ip_address=request.META.get('REMOTE_ADDR'),
-            session_id=request.session.session_key or '',
         )
-        order.calculate_totals()   # this was defined on your model but never called anywhere
-        order.save()               # triggers generate_order_number() via your save() override
 
-        # decrement stock now that the order is placed
-        for shoe_id, item in items_payload.items():
-            shoe = Shoe.objects.get(id=shoe_id)
-            shoe.stock = max(0, shoe.stock - item['quantity'])
-            shoe.save()
-
-        request.session['cart'] = {}
-        request.session.modified = True
-
-        return redirect('order_confirmation', order_number=order.order_number)
-
-    # GET: show the checkout form with a summary of what's in the bag
-    items = []
-    subtotal = Decimal('0.00')
-    for shoe_id, data in cart.items():
-        quantity = data.get('quantity', 1)
-        try:
-            shoe = Shoe.objects.get(id=shoe_id)
-        except Shoe.DoesNotExist:
-            continue
-        item_subtotal = shoe.final_price * quantity
-        subtotal += item_subtotal
-        items.append({'shoe': shoe, 'quantity': quantity, 'subtotal': item_subtotal})
-
-    return render(request, 'checkout.html', {'cart_items': items, 'subtotal': subtotal})
-
-
-def order_confirmation(request, order_number):
-    order = get_object_or_404(Order, order_number=order_number)
-    return render(request, 'order_confirmation.html', {'order': order})
-
-
-
-"""
-Corrected to match the cart shape your Order.get_items_list() already assumes:
-cart = {"<shoe_id>": {"quantity": int, "price": float, "size": str}}
-"""
-
-FREE_SHIPPING_THRESHOLD = 100.00
-SHIPPING_FLAT_RATE = 5.00
-
-
-def _is_ajax(request):
-    return request.headers.get('x-requested-with') == 'XMLHttpRequest'
-
-
-def add_to_cart(request, shoe_id):
-    shoe = get_object_or_404(Shoe, id=shoe_id)
-
-    if shoe.stock <= 0:
-        if _is_ajax(request):
-            return JsonResponse({'success': False, 'error': f'{shoe.name} is out of stock.'}, status=400)
-        return redirect('home')
-
-    size = request.POST.get('size') or request.GET.get('size') or ''
-
-    cart = request.session.get('cart', {})
-    key = str(shoe_id)
-
-    if key in cart and isinstance(cart[key], dict):
-        cart[key]['quantity'] += 1
-    else:
-        cart[key] = {
-            'quantity': 1,
-            'price': float(shoe.final_price),
-            'size': size,
-        }
-
-    request.session['cart'] = cart
-    request.session.modified = True
-
-    if _is_ajax(request):
-        return JsonResponse({'success': True, 'added': shoe.name, **_cart_data(request)})
-    return redirect(request.META.get('HTTP_REFERER', 'home'))
-
-
-def update_cart(request, shoe_id):
-    if request.method != 'POST':
-        return redirect('cart')
-
-    cart = request.session.get('cart', {})
-    key = str(shoe_id)
-    action = request.POST.get('action')
-
-    if key in cart:
-        if action == 'increase':
-            cart[key]['quantity'] += 1
-        elif action == 'decrease':
-            cart[key]['quantity'] -= 1
-            if cart[key]['quantity'] <= 0:
-                del cart[key]
-
-    request.session['cart'] = cart
-    request.session.modified = True
-
-    if _is_ajax(request):
-        return JsonResponse({'success': True, **_cart_data(request)})
-    return redirect('cart')
-
-
-def remove_from_cart(request, shoe_id):
-    cart = request.session.get('cart', {})
-    cart.pop(str(shoe_id), None)
-    request.session['cart'] = cart
-    request.session.modified = True
-
-    if _is_ajax(request):
-        return JsonResponse({'success': True, **_cart_data(request)})
-    return redirect('cart')
-
-
-def _cart_data(request):
-    cart = request.session.get('cart', {})
-    items = []
-    subtotal = 0.0
-
-    for shoe_id, data in cart.items():
-        try:
-            shoe = Shoe.objects.get(id=shoe_id)
-        except Shoe.DoesNotExist:
-            continue
-
-        quantity = data.get('quantity', 1)
-        price = data.get('price', float(shoe.final_price))
-        item_subtotal = price * quantity
-        subtotal += item_subtotal
-
-        items.append({
-            'id': shoe.id,
-            'name': shoe.name,
-            'price': price,
-            'quantity': quantity,
-            'size': data.get('size', ''),
-            'subtotal': item_subtotal,
-            'image_url': shoe.image.url if getattr(shoe, 'image', None) else None,
-        })
-
-    shipping = 0.0 if (subtotal == 0 or subtotal >= FREE_SHIPPING_THRESHOLD) else SHIPPING_FLAT_RATE
-    total = subtotal + shipping
-    count = sum(item.get('quantity', 0) for item in cart.values())
-
-    return {'items': items, 'subtotal': subtotal, 'shipping': shipping, 'total': total, 'count': count}
-
-
-def cart_data(request):
-    return JsonResponse(_cart_data(request))
-
-
-@ensure_csrf_cookie
-def cart(request):
-    data = _cart_data(request)
-    return render(request, 'cart.html', {
-        'cart_items': data['items'],
-        'subtotal': data['subtotal'],
-        'shipping': data['shipping'],
-        'total': data['total'],
-    })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        if created:
+            self.stdout.write(self.style.SUCCESS('✅ Created default category'))
+
+        products = [
+            {
+                'name': 'Air Max Elite',
+                'price': 149.99,
+                'description': 'Premium running shoes with maximum comfort and style. Features responsive cushioning and breathable mesh upper.',
+                'sizes': '7,8,9,10,11,12',
+                'stock': 25,
+                'image_url': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500'
+            },
+            {
+                'name': 'Urban Sneaker Pro',
+                'price': 89.99,
+                'description': 'Versatile sneakers perfect for everyday wear. Classic design with modern comfort technology.',
+                'sizes': '8,9,10,11',
+                'stock': 30,
+                'image_url': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500'
+            },
+            {
+                'name': 'Classic Leather Oxford',
+                'price': 199.99,
+                'description': 'Timeless leather oxford shoes for formal occasions. Handcrafted with premium Italian leather.',
+                'sizes': '8,9,10,11,12',
+                'stock': 15,
+                'image_url': 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=500'
+            },
+            {
+                'name': 'Trail Runner X',
+                'price': 129.99,
+                'description': 'Durable trail running shoes designed for off-road adventures. Excellent grip and stability.',
+                'sizes': '7,8,9,10,11',
+                'stock': 20,
+                'image_url': 'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=500'
+            },
+            {
+                'name': 'Minimalist Loafers',
+                'price': 79.99,
+                'description': 'Elegant loafers for a sophisticated casual look. Crafted with soft suede and leather lining.',
+                'sizes': '8,9,10',
+                'stock': 18,
+                'image_url': 'https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=500'
+            },
+            {
+                'name': 'Sport Court Classic',
+                'price': 109.99,
+                'description': 'Retro basketball sneakers with modern comfort. Iconic design with responsive cushioning.',
+                'sizes': '9,10,11,12',
+                'stock': 22,
+                'image_url': 'https://images.unsplash.com/photo-1516478177764-9fe0bd749e18?w=500'
+            },
+            {
+                'name': 'Eco-Friendly Runners',
+                'price': 159.99,
+                'description': 'Sustainable running shoes made from recycled materials. Lightweight and eco-conscious.',
+                'sizes': '7,8,9,10',
+                'stock': 12,
+                'image_url': 'https://images.unsplash.com/photo-1575408264798-b50b252663e6?w=500'
+            },
+            {
+                'name': 'Luxury Chelsea Boots',
+                'price': 249.99,
+                'description': 'Premium Chelsea boots crafted from full-grain leather. Versatile and timeless design.',
+                'sizes': '8,9,10,11',
+                'stock': 10,
+                'image_url': 'https://images.unsplash.com/photo-1638247025967-b4e38c3b7c2b?w=500'
+            },
+            {
+                'name': 'Performance Training Shoe',
+                'price': 119.99,
+                'description': 'High-performance training shoes with superior support and stability for intense workouts.',
+                'sizes': '7,8,9,10,11,12',
+                'stock': 28,
+                'image_url': 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=500'
+            },
+            {
+                'name': 'Summer Slide Sandals',
+                'price': 59.99,
+                'description': 'Comfortable slide sandals perfect for summer. Soft footbed with durable construction.',
+                'sizes': '8,9,10,11',
+                'stock': 35,
+                'image_url': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500'
+            },
+            {
+                'name': 'Premium Leather Derby',
+                'price': 189.99,
+                'description': 'Classic derby shoes with a modern twist. Made with premium calfskin leather.',
+                'sizes': '8,9,10,11,12',
+                'stock': 14,
+                'image_url': 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=500'
+            },
+            {
+                'name': 'Lightweight Mesh Runners',
+                'price': 99.99,
+                'description': 'Ultra-lightweight running shoes with breathable mesh upper and responsive foam.',
+                'sizes': '7,8,9,10',
+                'stock': 32,
+                'image_url': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500'
+            }
+        ]
+
+
+        added = 0
+        for p in products:
+            base_slug = slugify(p['name'])
+            slug = base_slug
+            counter = 1
+            while Shoe.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            obj, created = Shoe.objects.get_or_create(
+                name=p['name'],
+                defaults={
+                    'price': p['price'],
+                    'description': p['description'],
+                    'sizes': p['sizes'],
+                    'stock': p['stock'],
+                    'category': category,
+                    'slug': slug,
+                }
+            )
+
+            if created:
+                added += 1
+                self.stdout.write(self.style.SUCCESS(f'✅ Added: {obj.name} (slug: {obj.slug})'))
+
+                image_url = p.get('image_url')
+                if image_url:
+                    try:
+                        response = requests.get(p['image_url'], timeout=10)
+                        response.raise_for_status()
+                        path = urlparse(p['image_url']).path
+                        ext = os.path.splitext(path)[1] or '.jpg'
+                        filename = f'{slug}{ext}'
+                        obj.image.save(filename, ContentFile(response.content), save=True)
+                        self.stdout.write(self.style.SUCCESS(f'   ↳ image saved for {obj.name}'))
+                    except requests.RequestException as e:
+                        self.stdout.write(self.style.WARNING(f'   ⚠️ could not fetch image for {obj.name}: {e}'))
+            else:
+                self.stdout.write(self.style.WARNING(f'⚠️ Skipped: {obj.name} (already exists)'))
+
+        self.stdout.write(self.style.SUCCESS(f'\n✅ Added {added} new products! Total: {Shoe.objects.count()}'))
+        
+        
+        
+        
+        
+        
+        
+
+
+        
+        

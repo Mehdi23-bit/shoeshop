@@ -9,10 +9,32 @@ import json
 import re
 from django.views.decorators.csrf import ensure_csrf_cookie
 
+def _category_thumb(qs):
+    """Return the first available shoe image in this queryset, or None."""
+    for shoe in qs:
+        if shoe.image:
+            return shoe.image.url
+    return None
+
+
 @ensure_csrf_cookie
 def home(request):
     shoes = Shoe.objects.all().order_by('-created_at')
-    return render(request, 'shoesshop/home.html', {'shoes': shoes})
+
+    men_qs = Shoe.objects.filter(gender='M', is_active=True)
+    women_qs = Shoe.objects.filter(gender='W', is_active=True)
+    featured_qs = Shoe.objects.filter(is_featured=True, is_active=True)
+
+    categories_preview = [
+        {'title': "Men's Collection", 'count': men_qs.count(), 'image': _category_thumb(men_qs)},
+        {'title': "Women's Collection", 'count': women_qs.count(), 'image': _category_thumb(women_qs)},
+        {'title': 'Limited Edition', 'count': featured_qs.count(), 'image': _category_thumb(featured_qs)},
+    ]
+
+    return render(request, 'shoesshop/home.html', {
+        'shoes': shoes,
+        'categories_preview': categories_preview,
+    })
 
 
 def clear_cart(request):
@@ -80,7 +102,7 @@ def _cart_data(request):
             'price': float(shoe.price),
             'quantity': quantity,
             'subtotal': item_subtotal,
-            'image_url': None,
+            'image_url': shoe.image.url if shoe.image else None,
         })
 
     shipping = 0.0 if (subtotal == 0 or subtotal >= FREE_SHIPPING_THRESHOLD) else SHIPPING_FLAT_RATE
