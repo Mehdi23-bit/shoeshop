@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Bag - VELO</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --leather: #2B1D14; --leather-2: #3D2A1C; --cream: #F6F0E6; --cream-2: #EDE3D0;
+            --ink: #241A12; --brass: #B08D57; --brass-light: #D3B27C; --burgundy: #7A2E2E;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Manrope', sans-serif; background:var(--cream); color:var(--ink); }
+
+        .navbar {
+            background: rgba(246, 240, 230, 0.94) !important; backdrop-filter: blur(20px);
+            padding: 18px 0; border-bottom: 1px solid rgba(43,29,20,0.08);
+        }
+        .navbar-brand {
+            font-family:'Playfair Display', serif; font-size:2rem; font-weight:900; letter-spacing:-1px;
+            color: var(--leather) !important; display:flex; align-items:center; gap:10px;
+        }
+        .navbar-brand i { color: var(--brass); font-size:1.6rem; }
+        .nav-link {
+            font-weight:600; font-size:0.85rem; text-transform:uppercase; letter-spacing:1.5px;
+            color: var(--ink) !important; padding: 8px 20px !important;
+        }
+        .cart-link { background: var(--leather); color: var(--cream) !important; border-radius:50px; padding:8px 24px !important; }
+
+        .cart-page { padding: 60px 0 100px; min-height: 70vh; }
+        .cart-page h1 { font-family:'Playfair Display', serif; color: var(--leather); font-size: 2.4rem; margin-bottom: 40px; }
+
+        .cart-line {
+            display:flex; gap:18px; align-items:center; padding:20px 0;
+            border-bottom:1px dashed rgba(176,141,87,0.35);
+        }
+        .cart-line-img { width:80px; height:80px; border-radius:4px; background:var(--cream-2); flex-shrink:0; overflow:hidden; }
+        .cart-line-img img { width:100%; height:100%; object-fit:cover; }
+        .cart-line-img i { display:flex; align-items:center; justify-content:center; height:100%; color:rgba(43,29,20,0.15); font-size:1.6rem; }
+        .cart-line-info { flex:1; }
+        .cart-line-info h5 { font-family:'Playfair Display', serif; color:var(--leather); margin:0 0 6px; }
+        .cart-line-price { color:var(--brass); font-weight:700; }
+
+        .qty-controls { display:flex; align-items:center; gap:10px; margin-top:8px; }
+        .qty-controls button {
+            width:28px; height:28px; border-radius:50%; border:1px dashed rgba(176,141,87,0.5);
+            background:transparent; color:var(--leather); font-weight:700; cursor:pointer;
+        }
+        .qty-controls button:hover { background: rgba(176,141,87,0.1); }
+
+        .checkout-card {
+            background:var(--cream-2); border-radius:8px; padding:30px;
+            border:1px solid rgba(43,29,20,0.08); position:sticky; top:100px;
+        }
+        .checkout-card h4 { font-family:'Playfair Display', serif; color:var(--leather); margin-bottom:20px; }
+        .checkout-row { display:flex; justify-content:space-between; padding:6px 0; color:var(--ink); }
+        .checkout-row.total { font-weight:700; font-size:1.15rem; border-top:1px solid rgba(43,29,20,0.1); margin-top:10px; padding-top:14px; }
+
+        .form-group { margin-bottom:18px; }
+        .form-group label { display:block; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--leather); font-weight:700; margin-bottom:6px; }
+        .form-group input, .form-group textarea {
+            width:100%; padding:12px 16px; border:1px solid rgba(43,29,20,0.15); border-radius:6px;
+            background:var(--cream); font-family:'Manrope', sans-serif; outline:none;
+        }
+        .form-group input:focus, .form-group textarea:focus { border-color:var(--brass); }
+
+        .place-order-btn {
+            width:100%; margin-top:10px; padding:16px; border:none; border-radius:50px;
+            background:var(--leather); color:var(--cream); font-weight:700; text-transform:uppercase;
+            letter-spacing:1px; cursor:pointer; transition:background 0.3s ease;
+        }
+        .place-order-btn:hover { background:var(--leather-2); }
+
+        .empty-cart { text-align:center; padding:80px 20px; color:rgba(43,29,20,0.4); }
+        .btn-add {
+            display:inline-block; width:auto; padding:12px 30px; border:2px solid var(--leather);
+            background:transparent; color:var(--leather); border-radius:50px; font-weight:700;
+            font-size:0.82rem; text-transform:uppercase; letter-spacing:1px; text-decoration:none; margin-top:20px;
+        }
+        .btn-add:hover { background:var(--leather); color:var(--cream); }
+
+        .footer { background:#1A100A; padding:50px 0 25px; margin-top:60px; }
+        .footer-brand { font-family:'Playfair Display', serif; font-size:1.6rem; font-weight:900; color:var(--cream); text-align:center; }
+        .footer-bottom { text-align:center; color:rgba(246,240,230,0.25); font-size:0.85rem; padding-top:20px; }
+
+        .alert-box { padding:14px 20px; border-radius:6px; margin-bottom:20px; font-size:0.9rem; }
+        .alert-box.error { background:rgba(122,46,46,0.1); color:var(--burgundy); border:1px solid rgba(122,46,46,0.25); }
+        .alert-box.success { background:rgba(61,107,74,0.1); color:#3D6B4A; border:1px solid rgba(61,107,74,0.25); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}"><i class="fas fa-shoe-prints"></i> VELO</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}#products">Collection</a></li>
+                    <li class="nav-item"><a class="nav-link cart-link" href="{% url 'cart' %}"><i class="fas fa-shopping-bag"></i> Cart</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="cart-page">
+        <div class="container">
+            <h1><i class="fas fa-shopping-bag"></i> Your Bag</h1>
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert-box {% if message.tags == 'error' %}error{% else %}success{% endif %}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% if cart_items %}
+            <div class="row g-5">
+                <div class="col-lg-7">
+                    {% for item in cart_items %}
+                    <div class="cart-line">
+                        <div class="cart-line-img">
+                            {% if item.image_url %}<img src="{{ item.image_url }}" alt="{{ item.name }}">
+                            {% else %}<i class="fas fa-shoe-prints"></i>{% endif %}
+                        </div>
+                        <div class="cart-line-info">
+                            <h5>{{ item.name }}</h5>
+                            <div class="cart-line-price">${{ item.price|floatformat:2 }}</div>
+                            <div class="qty-controls">
+                                <button type="button" data-action="decrease" data-id="{{ item.id }}">&minus;</button>
+                                <span>{{ item.quantity }}</span>
+                                <button type="button" data-action="increase" data-id="{{ item.id }}">+</button>
+                            </div>
+                        </div>
+                        <div style="font-weight:700;color:var(--leather);">${{ item.subtotal|floatformat:2 }}</div>
+                        <button type="button" data-remove="{{ item.id }}" style="background:none;border:none;color:rgba(43,29,20,0.3);"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="checkout-card">
+                        <h4>Order Summary</h4>
+                        <div class="checkout-row"><span>Subtotal</span><span>${{ subtotal|floatformat:2 }}</span></div>
+                        <div class="checkout-row"><span>Shipping</span><span>{% if shipping == 0 %}Free{% else %}${{ shipping|floatformat:2 }}{% endif %}</span></div>
+                        <div class="checkout-row total"><span>Total</span><span>${{ total|floatformat:2 }}</span></div>
+
+                        <form method="post" action="{% url 'place_order' %}" style="margin-top:25px;">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" name="phone" placeholder="06XXXXXXXX" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Delivery Address</label>
+                                <textarea name="address" rows="3" placeholder="Street, city, landmark..." required></textarea>
+                            </div>
+                            <button type="submit" class="place-order-btn"><i class="fas fa-check"></i> Place Order</button>
+                            <p style="font-size:0.78rem;color:rgba(43,29,20,0.5);margin-top:12px;text-align:center;">
+                                We'll call you to confirm your order.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-cart">
+                <i class="fas fa-shoe-prints" style="font-size:3rem;"></i>
+                <p>Your bag is empty.</p>
+                <a href="{% url 'home' %}" class="btn-add">Continue Shopping</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-brand"><i class="fas fa-shoe-prints"></i> VELO</div>
+        <div class="footer-bottom"><p>&copy; 2024 VELO. All rights reserved.</p></div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function getCookie(name) {
+            const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+            return match ? match.pop() : '';
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        document.addEventListener('click', function(e) {
+            const qtyBtn = e.target.closest('.qty-controls button');
+            if (qtyBtn) {
+                const id = qtyBtn.dataset.id, action = qtyBtn.dataset.action;
+                fetch(`/cart/update/${id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=${action}`,
+                }).then(() => location.reload());
+            }
+            const removeBtn = e.target.closest('[data-remove]');
+            if (removeBtn) {
+                fetch(`/cart/remove/${removeBtn.dataset.remove}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken,
+                    },
+                }).then(() => location.reload());
+            }
+        });
+    </script>
+</body>
+</html>

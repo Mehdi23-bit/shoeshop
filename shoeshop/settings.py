@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-zd&v62unkdn&z&7ohi8ikhv8s71(ba#hgid-e7d%78+_!=iqh+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['mehdi23-bit.pythonanywhere.com']
 
 
 # Application definition
@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "products",
     "accounts",
-    "orders",
+    
 ]
 
 MIDDLEWARE = [
@@ -64,6 +64,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "products.context_preprocessor.cart_count",
             ],
         },
     },
@@ -135,3 +136,9 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Session settings
 SESSION_COOKIE_AGE = 86400  # 24 hours
+
+
+
+LOGIN_URL = 'admin_login'
+LOGIN_REDIRECT_URL = 'admin_dashboard'
+LOGOUT_REDIRECT_URL = 'home'

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed - VELO</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --leather: #2B1D14; --leather-2: #3D2A1C; --cream: #F6F0E6; --cream-2: #EDE3D0;
+            --ink: #241A12; --brass: #B08D57; --brass-light: #D3B27C; --burgundy: #7A2E2E;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Manrope', sans-serif; background:var(--cream); color:var(--ink); }
+
+        .navbar {
+            background: rgba(246, 240, 230, 0.94) !important; backdrop-filter: blur(20px);
+            padding: 18px 0; border-bottom: 1px solid rgba(43,29,20,0.08);
+        }
+        .navbar-brand {
+            font-family:'Playfair Display', serif; font-size:2rem; font-weight:900; letter-spacing:-1px;
+            color: var(--leather) !important; display:flex; align-items:center; gap:10px;
+        }
+        .navbar-brand i { color: var(--brass); font-size:1.6rem; }
+
+        .confirm-page { padding: 70px 0 100px; min-height: 70vh; }
+
+        .confirm-hero { text-align:center; margin-bottom: 50px; }
+        .confirm-icon {
+            width: 90px; height: 90px; border-radius: 50%; background: rgba(61,107,74,0.1);
+            display:flex; align-items:center; justify-content:center; margin: 0 auto 25px;
+        }
+        .confirm-icon i { font-size: 2.6rem; color: #3D6B4A; }
+        .confirm-hero h1 { font-family:'Playfair Display', serif; font-size: 2.6rem; color: var(--leather); margin-bottom: 12px; }
+        .confirm-hero p { color: rgba(36,26,18,0.6); font-size: 1.05rem; max-width: 480px; margin: 0 auto; line-height:1.7; }
+        .order-number-badge {
+            display:inline-block; margin-top:18px; padding: 8px 24px; background: var(--leather);
+            color: var(--cream); border-radius: 50px; font-weight:700; letter-spacing:1px; font-size:0.95rem;
+        }
+
+        .order-card {
+            background: var(--cream-2); border-radius: 8px; padding: 35px;
+            border: 1px solid rgba(43,29,20,0.08); max-width: 700px; margin: 0 auto;
+        }
+        .order-card h4 { font-family:'Playfair Display', serif; color: var(--leather); margin-bottom: 20px; }
+
+        .order-line {
+            display:flex; justify-content:space-between; align-items:center; padding: 14px 0;
+            border-bottom: 1px dashed rgba(176,141,87,0.35); gap: 14px;
+        }
+        .order-line-img { width:56px; height:56px; border-radius:4px; background:var(--cream); flex-shrink:0; overflow:hidden; }
+        .order-line-img img { width:100%; height:100%; object-fit:cover; }
+        .order-line-img i { display:flex; align-items:center; justify-content:center; height:100%; color:rgba(43,29,20,0.15); }
+        .order-line-name { flex:1; font-weight:600; color:var(--ink); }
+        .order-line-qty { color: rgba(36,26,18,0.5); font-size:0.85rem; }
+        .order-line-price { font-weight:700; color: var(--leather); }
+
+        .order-summary-row { display:flex; justify-content:space-between; padding: 6px 0; color: var(--ink); }
+        .order-summary-row.total { font-weight:700; font-size:1.15rem; border-top:1px solid rgba(43,29,20,0.1); margin-top:10px; padding-top:14px; }
+
+        .delivery-info { margin-top: 30px; padding-top: 25px; border-top: 1px solid rgba(43,29,20,0.1); }
+        .delivery-info h5 { font-family:'Playfair Display', serif; color: var(--leather); margin-bottom: 14px; font-size:1.1rem; }
+        .delivery-row { display:flex; gap:12px; margin-bottom: 10px; color: var(--ink); font-size: 0.92rem; }
+        .delivery-row i { color: var(--brass); width: 18px; margin-top: 3px; }
+
+        .status-note {
+            margin-top: 25px; padding: 16px 20px; background: rgba(176,141,87,0.1);
+            border-radius: 6px; font-size: 0.88rem; color: var(--leather-2); display:flex; gap:10px; align-items:flex-start;
+        }
+        .status-note i { color: var(--brass); margin-top: 2px; }
+
+        .action-row { text-align:center; margin-top: 35px; }
+        .btn-add {
+            display:inline-block; padding:14px 36px; border:2px solid var(--leather);
+            background:transparent; color:var(--leather); border-radius:50px; font-weight:700;
+            font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; text-decoration:none;
+        }
+        .btn-add:hover { background: var(--leather); color: var(--cream); }
+
+        .footer { background:#1A100A; padding:50px 0 25px; margin-top:60px; }
+        .footer-brand { font-family:'Playfair Display', serif; font-size:1.6rem; font-weight:900; color:var(--cream); text-align:center; }
+        .footer-bottom { text-align:center; color:rgba(246,240,230,0.25); font-size:0.85rem; padding-top:20px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}"><i class="fas fa-shoe-prints"></i> VELO</a>
+        </div>
+    </nav>
+
+    <section class="confirm-page">
+        <div class="container">
+            <div class="confirm-hero">
+                <div class="confirm-icon"><i class="fas fa-check"></i></div>
+                <h1>Order Placed!</h1>
+                <p>Thank you — we've received your order. Our team will call you shortly to confirm the details before dispatch.</p>
+                <div class="order-number-badge">#{{ order.order_number }}</div>
+            </div>
+
+            <div class="order-card">
+                <h4>Order Summary</h4>
+
+                {% for item in order.get_items_list %}
+                <div class="order-line">
+                    <div class="order-line-img">
+                        {% if item.image %}<img src="{{ item.image }}" alt="{{ item.name }}">
+                        {% else %}<i class="fas fa-shoe-prints"></i>{% endif %}
+                    </div>
+                    <div class="order-line-name">
+                        {{ item.name }}
+                        <div class="order-line-qty">Qty {{ item.quantity }}</div>
+                    </div>
+                    <div class="order-line-price">${{ item.subtotal|floatformat:2 }}</div>
+                </div>
+                {% endfor %}
+
+                <div style="margin-top:18px;">
+                    <div class="order-summary-row"><span>Subtotal</span><span>${{ order.subtotal|floatformat:2 }}</span></div>
+                    <div class="order-summary-row"><span>Shipping</span><span>{% if order.shipping_cost == 0 %}Free{% else %}${{ order.shipping_cost|floatformat:2 }}{% endif %}</span></div>
+                    <div class="order-summary-row total"><span>Total</span><span>${{ order.total|floatformat:2 }}</span></div>
+                </div>
+
+                <div class="delivery-info">
+                    <h5>Delivery Details</h5>
+                    <div class="delivery-row"><i class="fas fa-phone"></i><span>{{ order.customer_phone }}</span></div>
+                    <div class="delivery-row"><i class="fas fa-location-dot"></i><span>{{ order.shipping_address }}</span></div>
+                </div>
+
+                <div class="status-note">
+                    <i class="fas fa-circle-info"></i>
+                    <span>Status: <strong>{{ order.get_status_display }}</strong> — we'll reach out on the number above to confirm before your order ships.</span>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <a href="{% url 'home' %}" class="btn-add"><i class="fas fa-arrow-left"></i> Continue Shopping</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-brand"><i class="fas fa-shoe-prints"></i> VELO</div>
+        <div class="footer-bottom"><p>&copy; 2024 VELO. All rights reserved.</p></div>
+    </footer>
+
+</body>
+</html>

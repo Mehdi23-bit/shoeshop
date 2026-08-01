@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - VELO</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{ --navy:#1B2A38; --navy-2:#243b4d; --gold:#B08D57; --gold-light:#D3B27C; --cream:#F6F0E6; --danger:#C0392B; --ok:#2E7D5B; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family:'Manrope', sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center;
+            background: radial-gradient(ellipse at top right, var(--navy-2) 0%, var(--navy) 55%, #0f1820 100%);
+            padding:20px;
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.03); backdrop-filter: blur(10px);
+            border: 1px solid rgba(211,178,124,0.15); border-radius: 12px;
+            padding: 44px 40px; width: 100%; max-width: 400px;
+        }
+        .login-brand { text-align:center; margin-bottom: 34px; }
+        .login-brand i { font-size: 2.2rem; color: var(--gold); margin-bottom: 12px; display:block; }
+        .login-brand h1 { font-family:'Playfair Display', serif; font-size: 1.8rem; font-weight:900; color: var(--cream); }
+        .login-brand p { color: rgba(246,240,230,0.4); font-size: 0.82rem; letter-spacing:1px; text-transform:uppercase; margin-top:6px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display:block; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.6px; color: var(--gold-light); font-weight:700; margin-bottom:8px; }
+        .form-group input {
+            width:100%; padding:13px 16px; border:1px solid rgba(211,178,124,0.25); border-radius:6px;
+            background: rgba(255,255,255,0.04); color: var(--cream); font-family:'Manrope', sans-serif; outline:none; font-size:0.92rem;
+        }
+        .form-group input::placeholder { color: rgba(246,240,230,0.3); }
+        .form-group input:focus { border-color: var(--gold); background: rgba(255,255,255,0.07); }
+
+        .login-btn {
+            width:100%; padding:14px; border:none; border-radius:8px; background: var(--gold); color: var(--navy);
+            font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:0.85rem; cursor:pointer; margin-top:8px;
+            transition: background 0.2s ease;
+        }
+        .login-btn:hover { background: var(--gold-light); }
+
+        .alert-box {
+            padding:12px 16px; border-radius:6px; margin-bottom:20px; font-size:0.85rem;
+            background: rgba(192,57,43,0.12); color:#E88A7D; border:1px solid rgba(192,57,43,0.3);
+        }
+
+        .back-link { display:block; text-align:center; margin-top:26px; color: rgba(246,240,230,0.35); text-decoration:none; font-size:0.82rem; }
+        .back-link:hover { color: var(--gold-light); }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="login-brand">
+            <i class="fas fa-shoe-prints"></i>
+            <h1>VELO</h1>
+            <p>Admin Access</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}<div class="alert-box">{{ message }}</div>{% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Enter your username" required autofocus>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="login-btn"><i class="fas fa-lock"></i> Sign In</button>
+        </form>
+
+        <a href="{% url 'home' %}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Store</a>
+    </div>
+
+</body>
+</html>

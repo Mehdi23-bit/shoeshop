@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - VELO Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{ --navy:#1B2A38; --gold:#B08D57; --bg:#F4F6F8; --ink:#22303C;
+               --danger:#C0392B; --warn:#D18B27; --ok:#2E7D5B; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Manrope', sans-serif; background:var(--bg); color:var(--ink); display:flex; min-height:100vh; }
+
+        .sidebar { width:250px; background:var(--navy); flex-shrink:0; padding:26px 0; position:fixed; top:0; left:0; bottom:0; overflow-y:auto; }
+        .sidebar-brand { font-family:'Playfair Display', serif; font-weight:900; font-size:1.4rem; color:#F6F0E6; padding:0 26px 26px; display:flex; align-items:center; gap:10px; }
+        .sidebar-brand i { color:var(--gold); }
+        .sidebar-nav a {
+            display:flex; align-items:center; gap:12px; padding:13px 26px; color:rgba(246,240,230,0.65);
+            text-decoration:none; font-size:0.92rem; font-weight:600; border-left:3px solid transparent;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background:rgba(255,255,255,0.05); color:#F6F0E6; border-left-color:var(--gold); }
+        .sidebar-nav a i { width:18px; text-align:center; }
+
+        .main { margin-left:250px; flex:1; padding:36px 40px; }
+        .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:26px; }
+        .page-header h1 { font-family:'Playfair Display', serif; font-size:1.9rem; color:var(--navy); }
+
+        .add-btn {
+            padding:12px 26px; background:var(--navy); color:white; border-radius:8px; text-decoration:none;
+            font-weight:700; font-size:0.85rem; display:inline-flex; align-items:center; gap:8px;
+        }
+        .add-btn:hover { background:#243b4d; color:white; }
+
+        .panel { background:white; border-radius:10px; box-shadow:0 2px 12px rgba(27,42,56,0.06); overflow:hidden; }
+        table { width:100%; border-collapse:collapse; }
+        th { text-align:left; padding:14px 24px; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.6px; color:rgba(34,48,60,0.45); border-bottom:1px solid rgba(27,42,56,0.06); }
+        td { padding:14px 24px; font-size:0.88rem; border-bottom:1px solid rgba(27,42,56,0.05); vertical-align:middle; }
+        tr:last-child td { border-bottom:none; }
+
+        .prod-cell { display:flex; align-items:center; gap:12px; }
+        .prod-img { width:44px; height:44px; border-radius:6px; background:var(--bg); overflow:hidden; flex-shrink:0; }
+        .prod-img img { width:100%; height:100%; object-fit:cover; }
+        .prod-img i { display:flex; align-items:center; justify-content:center; height:100%; color:rgba(27,42,56,0.2); }
+
+        .badge { padding:4px 12px; border-radius:50px; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+        .badge.ok { background:rgba(46,125,91,0.1); color:var(--ok); }
+        .badge.low { background:rgba(209,139,39,0.12); color:var(--warn); }
+        .badge.out { background:rgba(192,57,43,0.1); color:var(--danger); }
+        .badge.inactive { background:rgba(34,48,60,0.08); color:rgba(34,48,60,0.5); }
+
+        .row-actions a, .row-actions button {
+            border:none; background:none; color:rgba(34,48,60,0.5); cursor:pointer; font-size:0.9rem; margin-right:12px; text-decoration:none;
+        }
+        .row-actions a:hover { color:var(--navy); }
+        .row-actions button:hover { color:var(--danger); }
+
+        .alert-box { padding:14px 20px; border-radius:6px; margin-bottom:22px; font-size:0.9rem; background:rgba(46,125,91,0.1); color:var(--ok); border:1px solid rgba(46,125,91,0.25); }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand"><i class="fas fa-shoe-prints"></i> VELO Admin</div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'admin_dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="{% url 'admin_orders' %}"><i class="fas fa-receipt"></i> Orders</a>
+            <a href="{% url 'admin_products' %}" class="active"><i class="fas fa-shoe-prints"></i> Products</a>
+            <a href="{% url 'home' %}"><i class="fas fa-arrow-left"></i> Back to Store</a>
+        </nav>
+    </aside>
+
+    <main class="main">
+        <div class="page-header">
+            <h1>Products</h1>
+            <a href="{% url 'admin_product_add' %}" class="add-btn"><i class="fas fa-plus"></i> Add Product</a>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}<div class="alert-box">{{ message }}</div>{% endfor %}
+        {% endif %}
+
+        <div class="panel">
+            <table>
+                <thead>
+                    <tr><th>Product</th><th>Brand</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for shoe in products %}
+                    <tr>
+                        <td>
+                            <div class="prod-cell">
+                                <div class="prod-img">
+                                    {% if shoe.image %}<img src="{{ shoe.image.url }}" alt="{{ shoe.name }}">
+                                    {% else %}<i class="fas fa-shoe-prints"></i>{% endif %}
+                                </div>
+                                <span style="font-weight:600;">{{ shoe.name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ shoe.brand }}</td>
+                        <td>${{ shoe.price|floatformat:2 }}</td>
+                        <td>{{ shoe.stock }}</td>
+                        <td>
+                            {% if not shoe.is_active %}<span class="badge inactive">Inactive</span>
+                            {% elif shoe.stock == 0 %}<span class="badge out">Out of Stock</span>
+                            {% elif shoe.stock <= 5 %}<span class="badge low">Low Stock</span>
+                            {% else %}<span class="badge ok">In Stock</span>{% endif %}
+                        </td>
+                        <td class="row-actions">
+                            <a href="{% url 'admin_product_edit' shoe.id %}" title="Edit"><i class="fas fa-pen"></i></a>
+                            <form method="post" action="{% url 'admin_product_delete' shoe.id %}" style="display:inline;" onsubmit="return confirm('Delete {{ shoe.name }}?');">
+                                {% csrf_token %}
+                                <button type="submit" title="Delete"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" style="text-align:center;color:rgba(34,48,60,0.4);padding:40px;">No products yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</body>
+</html>

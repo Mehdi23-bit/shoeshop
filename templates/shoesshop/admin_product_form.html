@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if shoe %}Edit{% else %}Add{% endif %} Product - VELO Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{ --navy:#1B2A38; --gold:#B08D57; --bg:#F4F6F8; --ink:#22303C; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Manrope', sans-serif; background:var(--bg); color:var(--ink); display:flex; min-height:100vh; }
+
+        .sidebar { width:250px; background:var(--navy); flex-shrink:0; padding:26px 0; position:fixed; top:0; left:0; bottom:0; overflow-y:auto; }
+        .sidebar-brand { font-family:'Playfair Display', serif; font-weight:900; font-size:1.4rem; color:#F6F0E6; padding:0 26px 26px; display:flex; align-items:center; gap:10px; }
+        .sidebar-brand i { color:var(--gold); }
+        .sidebar-nav a {
+            display:flex; align-items:center; gap:12px; padding:13px 26px; color:rgba(246,240,230,0.65);
+            text-decoration:none; font-size:0.92rem; font-weight:600; border-left:3px solid transparent;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background:rgba(255,255,255,0.05); color:#F6F0E6; border-left-color:var(--gold); }
+        .sidebar-nav a i { width:18px; text-align:center; }
+
+        .main { margin-left:250px; flex:1; padding:36px 40px; max-width:760px; }
+        .back-link { display:inline-flex; align-items:center; gap:8px; color:rgba(34,48,60,0.55); text-decoration:none; font-size:0.85rem; margin-bottom:16px; font-weight:600; }
+        .page-header h1 { font-family:'Playfair Display', serif; font-size:1.9rem; color:var(--navy); margin-bottom:26px; }
+
+        .panel { background:white; border-radius:10px; box-shadow:0 2px 12px rgba(27,42,56,0.06); padding:30px; }
+
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+        .form-group { margin-bottom:18px; }
+        .form-group label { display:block; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.6px; color:var(--navy); font-weight:700; margin-bottom:7px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width:100%; padding:11px 14px; border:1px solid rgba(27,42,56,0.15); border-radius:6px;
+            background:var(--bg); font-family:'Manrope', sans-serif; outline:none; font-size:0.9rem;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--gold); }
+        .form-group small { display:block; margin-top:5px; color:rgba(34,48,60,0.45); font-size:0.78rem; }
+
+        .checkbox-row { display:flex; gap:24px; margin-bottom:22px; }
+        .checkbox-row label { display:flex; align-items:center; gap:8px; font-size:0.88rem; font-weight:600; color:var(--ink); }
+        .checkbox-row input { width:auto; }
+
+        .current-img { width:80px; height:80px; border-radius:8px; overflow:hidden; background:var(--bg); margin-bottom:12px; }
+        .current-img img { width:100%; height:100%; object-fit:cover; }
+
+        .save-btn {
+            padding:14px 36px; border:none; border-radius:8px; background:var(--navy); color:white;
+            font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:0.82rem; cursor:pointer;
+        }
+        .save-btn:hover { background:#243b4d; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand"><i class="fas fa-shoe-prints"></i> VELO Admin</div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'admin_dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="{% url 'admin_orders' %}"><i class="fas fa-receipt"></i> Orders</a>
+            <a href="{% url 'admin_products' %}" class="active"><i class="fas fa-shoe-prints"></i> Products</a>
+            <a href="{% url 'home' %}"><i class="fas fa-arrow-left"></i> Back to Store</a>
+        </nav>
+    </aside>
+
+    <main class="main">
+        <a href="{% url 'admin_products' %}" class="back-link"><i class="fas fa-arrow-left"></i> All Products</a>
+        <div class="page-header"><h1>{% if shoe %}Edit Product{% else %}Add New Product{% endif %}</h1></div>
+
+        <div class="panel">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if shoe and shoe.image %}
+                <div class="current-img"><img src="{{ shoe.image.url }}" alt="{{ shoe.name }}"></div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" name="name" value="{{ shoe.name|default:'' }}" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Brand</label>
+                        <input type="text" name="brand" value="{{ shoe.brand|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select name="gender">
+                            <option value="M" {% if shoe.gender == 'M' %}selected{% endif %}>Men</option>
+                            <option value="W" {% if shoe.gender == 'W' %}selected{% endif %}>Women</option>
+                            <option value="K" {% if shoe.gender == 'K' %}selected{% endif %}>Kids</option>
+                            <option value="U" {% if shoe.gender == 'U' or not shoe %}selected{% endif %}>Unisex</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="number" step="0.01" name="price" value="{{ shoe.price|default:'' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Quantity</label>
+                        <input type="number" name="stock" value="{{ shoe.stock|default:'0' }}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Sizes</label>
+                    <input type="text" name="sizes" value="{{ shoe.sizes|join:', ' }}" placeholder="7, 8, 9, 10">
+                    <small>Comma-separated list of available sizes.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="4">{{ shoe.description|default:'' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <input type="file" name="image" accept="image/*">
+                    <small>{% if shoe %}Leave empty to keep the current image.{% endif %}</small>
+                </div>
+
+                <div class="checkbox-row">
+                    <label><input type="checkbox" name="is_active" {% if shoe.is_active or not shoe %}checked{% endif %}> Active (visible in store)</label>
+                    <label><input type="checkbox" name="is_featured" {% if shoe.is_featured %}checked{% endif %}> Featured</label>
+                </div>
+
+                <button type="submit" class="save-btn"><i class="fas fa-check"></i> Save Product</button>
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>
